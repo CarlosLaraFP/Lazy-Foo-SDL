@@ -14,5 +14,5 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS} src)
 
-add_executable(LazyFooSDL src/main.cpp src/renderer.cpp src/error.cpp)
+add_executable(LazyFooSDL src/main.cpp src/UserInput.cpp src/Renderer.cpp src/error.cpp src/Game.cpp)
 target_link_libraries(LazyFooSDL ${SDL2_LIBRARIES})

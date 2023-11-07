@@ -4,7 +4,11 @@ and may not be redistributed without written permission.*/
 //Using SDL and standard IO
 #include <SDL.h>
 #include <memory>
-#include "renderer.hpp"
+#include <chrono>
+#include <thread>
+#include "UserInput.hpp"
+#include "Renderer.hpp"
+#include "Game.hpp"
 
 //Screen dimension constants
 const int SCREEN_WIDTH = 640;
@@ -13,9 +17,15 @@ const int SCREEN_HEIGHT = 480;
 int main(int argc, char* args[])
 {
 	// Allow users to decide their screen dimensions
-	std::unique_ptr<Renderer> renderer = std::make_unique<Renderer>(SCREEN_WIDTH, SCREEN_HEIGHT);
+	Renderer renderer { SCREEN_WIDTH, SCREEN_HEIGHT };
 
-	renderer->GameLoop();
+	// Class to manage all input related functionality
+	UserInput input;
+
+	// Game manager class
+	Game game { input, renderer };
+
+	game.StartGameLoop();
 
 	return 0;
 }

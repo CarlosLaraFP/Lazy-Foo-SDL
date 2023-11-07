@@ -1,10 +1,5 @@
-#include <chrono>
-#include <thread>
-
-#include "renderer.hpp"
+#include "Renderer.hpp"
 #include "error.hpp"
-
-// TODO: Create Input class
 
 Renderer::Renderer(const int screenWidth, const int screenHeight) : screenWidth_{screenWidth}, screenHeight_{screenHeight}
 {
@@ -74,54 +69,16 @@ SDL_Surface* Renderer::LoadSurface(const std::string imageFile)
 	return surface;
 }
 
-//Hack to get window to stay up
-void Renderer::GameLoop()
+void Renderer::SetCurrentSurface(KeyPressSurfaces value)
 {
-	// An SDL event is something like a key press, mouse motion, joy button press, etc.
-	SDL_Event e; 
-	bool quit = false;
+	currentSurface_ = keyPressSurfaces_[static_cast<size_t>(value)];
+}
 
-	// Game loop
-	while (!quit) 
-	{
-		// Otherwise, CPU utilization goes from ~0% -> ~20%
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+void Renderer::SwapChain()
+{
+	//Apply the image by drawing to the back buffer first
+	SDL_BlitSurface(currentSurface_, nullptr, screenSurface_, nullptr);
 
-		// Handle events on queue: When you press a key, move the mouse, or touch a touch screen you put events onto the event queue.
-		// SDL_PollEvent takes the most recent event from the queue and puts the data from the event into the SDL_Event we passed into the function.
-		while (SDL_PollEvent(&e)) 
-		{ 
-			if (e.type == SDL_QUIT) 
-			{ 
-				quit = true; 
-			}
-
-			SDL_Scancode code = e.key.keysym.scancode;
-
-			switch (code)
-			{
-			case SDL_SCANCODE_LEFT:
-				currentSurface_ = keyPressSurfaces_[static_cast<size_t>(KeyPressSurfaces::KEY_PRESS_SURFACE_LEFT)];
-				break;
-			case SDL_SCANCODE_RIGHT:
-				currentSurface_ = keyPressSurfaces_[static_cast<size_t>(KeyPressSurfaces::KEY_PRESS_SURFACE_RIGHT)];
-				break;
-			case SDL_SCANCODE_UP:
-				currentSurface_ = keyPressSurfaces_[static_cast<size_t>(KeyPressSurfaces::KEY_PRESS_SURFACE_UP)];
-				break;
-			case SDL_SCANCODE_DOWN:
-				currentSurface_ = keyPressSurfaces_[static_cast<size_t>(KeyPressSurfaces::KEY_PRESS_SURFACE_DOWN)];
-				break;
-			default:
-				currentSurface_ = keyPressSurfaces_[static_cast<size_t>(KeyPressSurfaces::KEY_PRESS_SURFACE_DEFAULT)];
-				break;
-			}
-		} 
-
-		//Apply the image by drawing to the back buffer first
-		SDL_BlitSurface(currentSurface_, nullptr, screenSurface_, nullptr);
-
-		//Swap the back and front buffer so the user can see a fully finished frame
-		SDL_UpdateWindowSurface(window_);
-	}
+	//Swap the back and front buffer so the user can see a fully finished frame
+	SDL_UpdateWindowSurface(window_);
 }
