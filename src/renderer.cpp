@@ -24,6 +24,8 @@ Renderer::Renderer(const int screenWidth, const int screenHeight) : screenWidth_
 	screenSurface_ = SDL_GetWindowSurface(window_);
 
 	LoadMedia();
+
+	SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_DEFAULT);
 }
 
 Renderer::~Renderer()
@@ -66,7 +68,26 @@ SDL_Surface* Renderer::LoadSurface(const std::string imageFile)
 		ThrowSDLError("Unable to load image: " + imagePath);
 	}
 
-	return surface;
+	/*
+		When you load a bitmap, it's typically loaded in a 24bit format since most bitmaps are 24bit. 
+		Most, if not all, modern displays are not 24bit by default. If we blit an image that's 24bit 
+		onto a 32bit image, SDL will convert it every single time the image is blitted. Therefore, 
+		we convert it to the same format as the screen so no conversion needs to be done on blit.
+	*/
+	SDL_Surface* optimizedSurface = SDL_ConvertSurface(surface, screenSurface_->format, 0);
+
+	if (optimizedSurface == nullptr)
+	{
+		ThrowSDLError("Unable to optimize image: " + imagePath);
+	}
+
+	/*
+		SDL_ConvertSurface returns a copy of the original in a new format. The original loaded image is still in memory after the call. 
+		This means we have to free the original loaded surface or we'll have two copies of the same image in memory.
+	*/
+	SDL_FreeSurface(surface);
+
+	return optimizedSurface;
 }
 
 void Renderer::SetCurrentSurface(KeyPressSurfaces value)
@@ -76,8 +97,21 @@ void Renderer::SetCurrentSurface(KeyPressSurfaces value)
 
 void Renderer::SwapChain()
 {
-	//Apply the image by drawing to the back buffer first
-	SDL_BlitSurface(currentSurface_, nullptr, screenSurface_, nullptr);
+	/*
+		SDL 2 has a new dedicated function to blit images to a different size: SDL_BlitScaled. 
+		Like blitting images before, SDL_BlitScaled takes in a source surface to blit onto the destination surface. 
+		It also takes in a destination SDL_Rect which defines the position and size of the image you are blitting.
+		If we want to take an image that's smaller than the screen and make it the size of the screen, 
+		we make the destination width/height to be the width/height of the screen.
+	*/
+
+	//Apply the image stretched by drawing to the back buffer first
+	SDL_Rect stretchRect {};
+	stretchRect.x = 0;
+	stretchRect.y = 0;
+	stretchRect.w = screenWidth_;
+	stretchRect.h = screenHeight_;
+	SDL_BlitScaled(currentSurface_, nullptr, screenSurface_, &stretchRect);
 
 	//Swap the back and front buffer so the user can see a fully finished frame
 	SDL_UpdateWindowSurface(window_);

@@ -6,25 +6,29 @@ void UserInput::PollEvents(Game& game)
 	{
 		if (currentEvent_.type == SDL_QUIT) { game.Quit(); }
 
-		SDL_Scancode code = currentEvent_.key.keysym.scancode;
-
-		switch (code)
+		// Remove this condition to capture ALL event types, including init event(s)
+		else if (currentEvent_.type == SDL_KEYDOWN)
 		{
-		case SDL_SCANCODE_LEFT:
-			game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_LEFT);
-			break;
-		case SDL_SCANCODE_RIGHT:
-			game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_RIGHT);
-			break;
-		case SDL_SCANCODE_UP:
-			game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_UP);
-			break;
-		case SDL_SCANCODE_DOWN:
-			game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_DOWN);
-			break;
-		default:
-			game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_DEFAULT);
-			break;
+			SDL_Keycode code = currentEvent_.key.keysym.sym;
+
+			switch (code)
+			{
+			case SDLK_LEFT:
+				game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_LEFT);
+				break;
+			case SDLK_RIGHT:
+				game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_RIGHT);
+				break;
+			case SDLK_UP:
+				game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_UP);
+				break;
+			case SDLK_DOWN:
+				game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_DOWN);
+				break;
+			default:
+				game.GetRenderer().SetCurrentSurface(KeyPressSurfaces::KEY_PRESS_SURFACE_DEFAULT);
+				break;
+			}
 		}
 	}
 }
