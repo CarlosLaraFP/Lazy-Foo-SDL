@@ -1,5 +1,5 @@
 #include "Renderer.hpp"
-#include "error.hpp"
+#include "Error.hpp"
 
 Renderer::Renderer(const int screenWidth, const int screenHeight) : screenWidth_{screenWidth}, screenHeight_{screenHeight}
 {
